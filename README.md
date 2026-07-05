@@ -1,16 +1,25 @@
 # GuardianLink
-
 AI-Powered Missing Child Emergency Alert and Recovery Network
 
 ## Project Description
-GuardianLink helps parents report missing children and instantly notifies nearby police stations and volunteers.
+GuardianLink is a prototype web application that helps parents report a 
+missing child and simulates instantly alerting nearby police stations, 
+shops, and camera points. It demonstrates three connected portals: 
+Parent (report), Police (dashboard), and Shop/Camera Network (sighting reports).
 
 ## Technologies Used
-- Python
-- Flask
-- MySQL
-- OpenCV
-- Machine Learning
+- HTML5
+- CSS3
+- JavaScript (Vanilla)
+- Google Fonts (Barlow Condensed, Inter, JetBrains Mono)
+- Browser FileReader API (for photo upload/preview)
+
+## Features
+- Parent portal to report a missing child with photo, last-seen details, and contact info
+- Auto-generated unique Case ID for every report
+- Police dashboard showing all cases, statuses, and sighting logs
+- Shop/Camera portal to report sightings, which reflect instantly in the police dashboard
+- Simulated live "dispatch log" showing real-time activity
 
 ## Status
-Project Planning Phase
+Working Prototype
