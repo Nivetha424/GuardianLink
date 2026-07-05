@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GuardianLink — AI-Powered Missing Child Alert Network</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#12172B;
+    --ink-2:#1B2140;
+    --ink-3:#232A4D;
+    --paper:#F5F3EE;
+    --paper-2:#EAE6DC;
+    --alert:#E8543E;
+    --alert-dark:#C43F2C;
+    --safe:#2F9E6E;
+    --safe-dark:#227A56;
+    --steel:#8A94C4;
+    --steel-2:#3C4470;
+    --gold:#E8A93E;
+    --text-light:#F5F3EE;
+    --text-dim:#9AA3D1;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:var(--ink);
+    color:var(--text-light);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  .mono{font-family:'JetBrains Mono',monospace;}
+  .display{font-family:'Barlow Condensed',sans-serif; text-transform:uppercase; letter-spacing:0.02em;}
+
+  /* ===== Header ===== */
+  header{
+    background:var(--ink-2);
+    border-bottom:1px solid var(--steel-2);
+    padding:16px 24px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:12px;
+    position:sticky; top:0; z-index:50;
+  }
+  .brand{display:flex; align-items:center; gap:10px;}
+  .brand-mark{
+    width:36px; height:36px; border-radius:8px;
+    background:linear-gradient(135deg, var(--alert), var(--gold));
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:18px;
+    color:var(--ink);
+  }
+  .brand-text{display:flex; flex-direction:column; line-height:1.1;}
+  .brand-text .name{font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:22px; letter-spacing:0.03em;}
+  .brand-text .tag{font-size:10px; color:var(--text-dim); letter-spacing:0.08em; text-transform:uppercase;}
+
+  nav{display:flex; gap:4px; background:var(--ink); border-radius:10px; padding:4px;}
+  nav button{
+    background:transparent; border:none; color:var(--text-dim);
+    font-family:'Barlow Condensed',sans-serif; font-weight:600; letter-spacing:0.03em;
+    font-size:14px; text-transform:uppercase; padding:9px 16px; border-radius:7px;
+    cursor:pointer; transition:all .15s;
+  }
+  nav button.active{background:var(--alert); color:var(--text-light);}
+  nav button:not(.active):hover{color:var(--text-light); background:var(--ink-3);}
+
+  /* ===== Ticker (signature element) ===== */
+  .ticker-wrap{
+    background:#0C1020; border-bottom:1px solid var(--steel-2);
+    overflow:hidden; white-space:nowrap; position:relative;
+    padding:7px 0;
+  }
+  .ticker-wrap::before{
+    content:"● LIVE DISPATCH"; position:absolute; left:0; top:0; bottom:0;
+    background:var(--alert); color:#fff; font-family:'JetBrains Mono',monospace;
+    font-size:10px; font-weight:700; letter-spacing:0.05em;
+    display:flex; align-items:center; padding:0 12px; z-index:2;
+  }
+  .ticker-track{
+    display:inline-block; padding-left:100%;
+    animation:scroll-left 32s linear infinite;
+    font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--steel);
+    padding-left:calc(100% + 150px);
+  }
+  .ticker-track span{margin-right:40px;}
+  .ticker-track span b{color:var(--gold); font-weight:700;}
+  @keyframes scroll-left{
+    0%{transform:translateX(0);}
+    100%{transform:translateX(-100%);}
+  }
+
+  main{max-width:1100px; margin:0 auto; padding:28px 20px 80px;}
+
+  /* ===== Section headers ===== */
+  .section-eyebrow{
+    font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--gold);
+    letter-spacing:0.1em; text-transform:uppercase; margin-bottom:6px;
+  }
+  h1.page-title{font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:36px; letter-spacing:0.01em; margin-bottom:4px;}
+  .page-sub{color:var(--text-dim); font-size:14px; margin-bottom:28px; max-width:560px;}
+
+  /* ===== Cards / panels ===== */
+  .panel{
+    background:var(--ink-2); border:1px solid var(--steel-2); border-radius:14px;
+    padding:24px;
+  }
+  .grid-2{display:grid; grid-template-columns:1.1fr 0.9fr; gap:20px;}
+  @media(max-width:800px){.grid-2{grid-template-columns:1fr;}}
+
+  label{display:block; font-size:12px; font-weight:600; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:6px; margin-top:16px;}
+  label:first-of-type{margin-top:0;}
+  input[type=text], input[type=number], input[type=tel], select, textarea{
+    width:100%; background:var(--ink); border:1px solid var(--steel-2); color:var(--text-light);
+    padding:11px 12px; border-radius:8px; font-family:'Inter',sans-serif; font-size:14px;
+    outline:none; transition:border .15s;
+  }
+  input:focus, select:focus, textarea:focus{border-color:var(--alert);}
+  textarea{resize:vertical; min-height:70px;}
+  .field-row{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+
+  .photo-upload{
+    border:2px dashed var(--steel-2); border-radius:10px; padding:18px; text-align:center;
+    cursor:pointer; transition:border .15s; position:relative;
+  }
+  .photo-upload:hover{border-color:var(--alert);}
+  .photo-upload img{max-width:100%; max-height:160px; border-radius:8px; display:block; margin:0 auto;}
+  .photo-upload .hint{color:var(--text-dim); font-size:13px;}
+  .photo-upload input{position:absolute; inset:0; opacity:0; cursor:pointer;}
+
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    font-family:'Barlow Condensed',sans-serif; font-weight:600; font-size:15px;
+    letter-spacing:0.03em; text-transform:uppercase; padding:12px 22px; border-radius:8px;
+    border:none; cursor:pointer; transition:transform .1s, background .15s;
+  }
+  .btn:active{transform:scale(0.97);}
+  .btn-alert{background:var(--alert); color:#fff;}
+  .btn-alert:hover{background:var(--alert-dark);}
+  .btn-safe{background:var(--safe); color:#fff;}
+  .btn-safe:hover{background:var(--safe-dark);}
+  .btn-ghost{background:transparent; border:1px solid var(--steel-2); color:var(--text-light);}
+  .btn-ghost:hover{border-color:var(--steel);}
+  .btn-block{width:100%; margin-top:22px;}
+
+  /* ===== Bulletin / case card ===== */
+  .case-card{
+    background:var(--ink); border:1px solid var(--steel-2); border-radius:12px;
+    padding:16px; display:flex; gap:14px; margin-bottom:12px; cursor:pointer;
+    position:relative; overflow:hidden; transition:border .15s;
+  }
+  .case-card:hover{border-color:var(--steel);}
+  .case-card.selected{border-color:var(--alert);}
+  .case-thumb{
+    width:64px; height:64px; border-radius:8px; background:var(--ink-3);
+    flex-shrink:0; overflow:hidden; display:flex; align-items:center; justify-content:center;
+    font-family:'Barlow Condensed',sans-serif; font-size:24px; color:var(--steel);
+  }
+  .case-thumb img{width:100%; height:100%; object-fit:cover;}
+  .case-info{flex:1; min-width:0;}
+  .case-info .cname{font-family:'Barlow Condensed',sans-serif; font-weight:600; font-size:19px;}
+  .case-info .cmeta{font-size:12px; color:var(--text-dim); margin-top:2px;}
+  .case-id{font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--steel); margin-top:5px;}
+  .badge{
+    font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700; letter-spacing:0.05em;
+    padding:4px 9px; border-radius:20px; text-transform:uppercase; white-space:nowrap;
+  }
+  .badge-active{background:rgba(232,84,62,0.18); color:#FF8A75; border:1px solid rgba(232,84,62,0.4);}
+  .badge-safe{background:rgba(47,158,110,0.18); color:#5FE3AA; border:1px solid rgba(47,158,110,0.4);}
+  .badge-closed{background:rgba(138,148,196,0.15); color:var(--text-dim); border:1px solid var(--steel-2);}
+  .stamp{
+    position:absolute; top:14px; right:14px;
+  }
+
+  /* ===== Detail panel ===== */
+  .detail-header{display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap;}
+  .detail-photo{width:88px; height:88px; border-radius:10px; overflow:hidden; background:var(--ink-3); flex-shrink:0;}
+  .detail-photo img{width:100%; height:100%; object-fit:cover;}
+  .kv-grid{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:18px;}
+  .kv{background:var(--ink); border:1px solid var(--steel-2); border-radius:8px; padding:10px 12px;}
+  .kv .k{font-size:10px; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-dim); margin-bottom:3px;}
+  .kv .v{font-size:14px;}
+  .sighting{
+    background:var(--ink); border:1px solid var(--steel-2); border-left:3px solid var(--gold);
+    border-radius:6px; padding:10px 12px; margin-bottom:8px; font-size:13px;
+  }
+  .sighting .stime{font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--gold); margin-bottom:3px;}
+  .empty-state{color:var(--text-dim); font-size:14px; padding:20px 0; text-align:center;}
+
+  .stat-row{display:flex; gap:12px; margin-top:18px; flex-wrap:wrap;}
+  .stat{background:var(--ink); border:1px solid var(--steel-2); border-radius:8px; padding:12px 16px; flex:1; min-width:100px;}
+  .stat .num{font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:26px; color:var(--gold);}
+  .stat .lbl{font-size:11px; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.04em;}
+
+  /* ===== Confirmation screen ===== */
+  .confirm-box{text-align:center; padding:40px 20px;}
+  .confirm-box .cid{
+    font-family:'JetBrains Mono',monospace; font-size:28px; color:var(--gold);
+    background:var(--ink); border:1px dashed var(--gold); border-radius:10px;
+    display:inline-block; padding:12px 24px; margin:16px 0;
+  }
+  .dist-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:14px; max-width:460px; margin:20px auto 0;}
+
+  /* ===== Toast ===== */
+  #toast{
+    position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px);
+    background:var(--safe); color:#fff; padding:13px 22px; border-radius:10px;
+    font-size:14px; font-weight:600; opacity:0; pointer-events:none; transition:all .25s;
+    box-shadow:0 8px 24px rgba(0,0,0,0.3); z-index:200; max-width:90vw; text-align:center;
+  }
+  #toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+
+  /* ===== Modal ===== */
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(10,12,25,0.75); display:none;
+    align-items:center; justify-content:center; z-index:100; padding:20px;
+  }
+  .modal-overlay.show{display:flex;}
+  .modal{background:var(--ink-2); border:1px solid var(--steel-2); border-radius:14px; padding:24px; max-width:420px; width:100%;}
+
+  ::placeholder{color:#5A628E;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="brand-mark">GL</div>
+    <div class="brand-text">
+      <span class="name">GuardianLink</span>
+      <span class="tag">Missing Child Alert Network</span>
+    </div>
+  </div>
+  <nav>
+    <button class="active" data-view="parent">Report</button>
+    <button data-view="police">Police Center</button>
+    <button data-view="shop">Shop &amp; Camera</button>
+  </nav>
+</header>
+
+<div class="ticker-wrap">
+  <div class="ticker-track" id="tickerTrack">
+    <span>SYSTEM ONLINE — awaiting activity...</span>
+  </div>
+</div>
+
+<main>
+
+  <!-- ============ PARENT VIEW ============ -->
+  <section id="view-parent">
+    <div class="section-eyebrow">Step 01 — Report</div>
+    <h1 class="page-title">Report a Missing Child</h1>
+    <p class="page-sub">Every field here becomes part of the alert that goes out to police and nearby shops/cameras. Fill in as much as you can — accuracy matters more than speed.</p>
+
+    <div id="parentForm" class="panel">
+      <div class="grid-2">
+        <div>
+          <label>Child's Full Name</label>
+          <input type="text" id="f_name" placeholder="e.g. Arjun Kumar">
+
+          <div class="field-row">
+            <div>
+              <label>Age</label>
+              <input type="number" id="f_age" placeholder="e.g. 7" min="0" max="17">
+            </div>
+            <div>
+              <label>Gender</label>
+              <select id="f_gender">
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+          </div>
+
+          <label>Last Seen Clothing / Colour</label>
+          <input type="text" id="f_clothing" placeholder="e.g. Blue T-shirt, black shorts">
+
+          <label>Last Seen Location</label>
+          <input type="text" id="f_lastseen" placeholder="e.g. Near Anna Nagar Bus Stand">
+
+          <label>Home Address</label>
+          <input type="text" id="f_address" placeholder="e.g. 12, Gandhi Street, Madurai">
+
+          <label>Parent / Guardian Contact Number</label>
+          <input type="tel" id="f_contact" placeholder="e.g. 98765 43210">
+
+          <label>Additional Details</label>
+          <textarea id="f_notes" placeholder="Any identifying marks, health conditions, behavior..."></textarea>
+        </div>
+
+        <div>
+          <label>Child's Photo</label>
+          <div class="photo-upload" id="photoUpload">
+            <input type="file" id="f_photo" accept="image/*">
+            <div id="photoPlaceholder">
+              <div style="font-size:28px; margin-bottom:6px;">📷</div>
+              <div class="hint">Tap to upload a recent clear photo</div>
+            </div>
+            <img id="photoPreview" style="display:none;">
+          </div>
+
+          <div class="panel" style="margin-top:16px; background:var(--ink); padding:16px;">
+            <div class="section-eyebrow" style="margin-bottom:8px;">What happens next</div>
+            <div style="font-size:13px; color:var(--text-dim); line-height:1.7;">
+              1. Case is logged with a unique ID<br>
+              2. Nearby police stations are alerted<br>
+              3. Registered shops &amp; camera points nearby receive the bulletin<br>
+              4. Any sighting is reported back to police instantly
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn btn-alert btn-block" onclick="submitReport()">🚨 Submit Report &amp; Alert Network</button>
+    </div>
+
+    <!-- Confirmation -->
+    <div id="parentConfirm" class="panel" style="display:none;">
+      <div class="confirm-box">
+        <div style="font-size:40px;">✅</div>
+        <h2 class="display" style="font-size:24px; margin-top:10px;">Alert Broadcasted</h2>
+        <p class="page-sub" style="margin:8px auto 0;">Case has been logged and the network has been notified.</p>
+        <div class="cid" id="confirmCaseId">GL-0000</div>
+        <div class="dist-grid">
+          <div class="stat"><div class="num" id="confStations">0</div><div class="lbl">Police Stations</div></div>
+          <div class="stat"><div class="num" id="confShops">0</div><div class="lbl">Shops Notified</div></div>
+          <div class="stat"><div class="num" id="confCameras">0</div><div class="lbl">Camera Points</div></div>
+        </div>
+        <button class="btn btn-ghost" style="margin-top:26px;" onclick="switchView('police')">Track this case in Police Center →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ POLICE VIEW ============ -->
+  <section id="view-police" style="display:none;">
+    <div class="section-eyebrow">Step 02 — Response</div>
+    <h1 class="page-title">Police &amp; Alert Center</h1>
+    <p class="page-sub">Live view of every active, resolved, and closed case. Sightings from the shop/camera network appear here in real time.</p>
+
+    <div class="stat-row" id="policeStats"></div>
+
+    <div class="grid-2" style="margin-top:22px;">
+      <div>
+        <div id="caseList"></div>
+      </div>
+      <div>
+        <div class="panel" id="caseDetail">
+          <div class="empty-state">Select a case from the list to view full details and sightings.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SHOP/CAMERA VIEW ============ -->
+  <section id="view-shop" style="display:none;">
+    <div class="section-eyebrow">Step 03 — Community Watch</div>
+    <h1 class="page-title">Shop &amp; Camera Network</h1>
+    <p class="page-sub">Registered shopkeepers and CCTV points near an active alert see it here. One tap reports a sighting straight to police.</p>
+
+    <div id="shopList"></div>
+  </section>
+
+</main>
+
+<div id="toast"></div>
+
+<div class="modal-overlay" id="sightModal">
+  <div class="modal">
+    <div class="section-eyebrow">Report Sighting</div>
+    <h2 class="display" style="font-size:22px; margin-bottom:14px;" id="sightModalTitle">Child seen</h2>
+    <label>Where did you see them?</label>
+    <input type="text" id="s_location" placeholder="e.g. Outside Sri Mart, Main Road">
+    <label>Approx. time</label>
+    <input type="text" id="s_time" placeholder="e.g. Just now / 5 mins ago">
+    <label>Notes</label>
+    <textarea id="s_notes" placeholder="What did you notice? Direction they went, who they were with..."></textarea>
+    <div style="display:flex; gap:10px; margin-top:20px;">
+      <button class="btn btn-ghost" style="flex:1;" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-alert" style="flex:1;" onclick="confirmSighting()">Submit Sighting</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ================= STATE =================
+let state = { cases: [], activity: [] };
+let caseCounter = 6;
+let selectedCaseId = null;
+let sightingModalCaseId = null;
+let photoData = null;
+
+// ================= NAV =================
+function switchView(view){
+  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active', b.dataset.view===view));
+  ['parent','police','shop'].forEach(v=>{
+    document.getElementById('view-'+v).style.display = (v===view)?'block':'none';
+  });
+  if(view==='police') renderPolice();
+  if(view==='shop') renderShop();
+}
+document.querySelectorAll('nav button').forEach(b=>{
+  b.addEventListener('click', ()=>switchView(b.dataset.view));
+});
+
+// ================= PHOTO UPLOAD =================
+document.getElementById('f_photo').addEventListener('change', function(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev){
+    photoData = ev.target.result;
+    document.getElementById('photoPreview').src = photoData;
+    document.getElementById('photoPreview').style.display = 'block';
+    document.getElementById('photoPlaceholder').style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+});
+
+// ================= UTIL =================
+function rand(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+function nowStr(){
+  const d = new Date();
+  return d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}) + ', ' + d.toLocaleDateString('en-IN',{day:'2-digit',month:'short'});
+}
+function logActivity(text){
+  state.activity.unshift({text, time: nowStr()});
+  renderTicker();
+}
+function renderTicker(){
+  const track = document.getElementById('tickerTrack');
+  if(state.activity.length===0){
+    track.innerHTML = '<span>SYSTEM ONLINE — awaiting activity...</span>';
+    return;
+  }
+  track.innerHTML = state.activity.slice(0,10).map(a=>`<span><b>${a.time}</b> — ${a.text}</span>`).join('');
+}
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 3200);
+}
+
+// ================= PARENT: SUBMIT REPORT =================
+function submitReport(){
+  const name = document.getElementById('f_name').value.trim();
+  const age = document.getElementById('f_age').value.trim();
+  const gender = document.getElementById('f_gender').value;
+  const clothing = document.getElementById('f_clothing').value.trim();
+  const lastseen = document.getElementById('f_lastseen').value.trim();
+  const address = document.getElementById('f_address').value.trim();
+  const contact = document.getElementById('f_contact').value.trim();
+  const notes = document.getElementById('f_notes').value.trim();
+
+  if(!name || !age || !clothing || !lastseen || !contact){
+    showToast('Please fill in name, age, clothing, last seen location and contact number.');
+    return;
+  }
+
+  caseCounter++;
+  const caseId = 'GL-2026-' + String(caseCounter).padStart(4,'0');
+  const dist = { stations: rand(3,7), shops: rand(9,18), cameras: rand(14,26) };
+
+  const newCase = {
+    id: caseId, name, age, gender, clothing, lastseen, address, contact, notes,
+    photo: photoData, status: 'ACTIVE', reportedAt: nowStr(), sightings: [], dist
+  };
+  state.cases.unshift(newCase);
+  logActivity(`New case opened — <b>${caseId}</b> (${name}, ${age})`);
+  logActivity(`Alert pushed to ${dist.stations} stations, ${dist.shops} shops, ${dist.cameras} camera points`);
+
+  document.getElementById('confirmCaseId').textContent = caseId;
+  document.getElementById('confStations').textContent = dist.stations;
+  document.getElementById('confShops').textContent = dist.shops;
+  document.getElementById('confCameras').textContent = dist.cameras;
+  document.getElementById('parentForm').style.display = 'none';
+  document.getElementById('parentConfirm').style.display = 'block';
+
+  photoData = null;
+}
+
+// ================= POLICE VIEW =================
+function renderPolice(){
+  const active = state.cases.filter(c=>c.status==='ACTIVE').length;
+  const safe = state.cases.filter(c=>c.status==='SAFE').length;
+  const totalSightings = state.cases.reduce((s,c)=>s+c.sightings.length,0);
+
+  document.getElementById('policeStats').innerHTML = `
+    <div class="stat"><div class="num">${state.cases.length}</div><div class="lbl">Total Cases</div></div>
+    <div class="stat"><div class="num" style="color:var(--alert);">${active}</div><div class="lbl">Active</div></div>
+    <div class="stat"><div class="num" style="color:var(--safe);">${safe}</div><div class="lbl">Resolved</div></div>
+    <div class="stat"><div class="num">${totalSightings}</div><div class="lbl">Sightings Logged</div></div>
+  `;
+
+  const list = document.getElementById('caseList');
+  if(state.cases.length===0){
+    list.innerHTML = '<div class="panel empty-state">No cases yet. Submit a report from the Parent view to see it here.</div>';
+  } else {
+    list.innerHTML = state.cases.map(c=>{
+      const badgeClass = c.status==='ACTIVE'?'badge-active':(c.status==='SAFE'?'badge-safe':'badge-closed');
+      return `
+      <div class="case-card ${selectedCaseId===c.id?'selected':''}" onclick="selectCase('${c.id}')">
+        <div class="case-thumb">${c.photo?`<img src="${c.photo}">`:'👤'}</div>
+        <div class="case-info">
+          <div class="cname">${c.name}, ${c.age}</div>
+          <div class="cmeta">${c.lastseen}</div>
+          <div class="case-id">${c.id} · ${c.reportedAt}</div>
+        </div>
+        <div class="stamp"><span class="badge ${badgeClass}">${c.status}</span></div>
+      </div>`;
+    }).join('');
+  }
+  renderCaseDetail();
+}
+
+function selectCase(id){
+  selectedCaseId = id;
+  renderPolice();
+}
+
+function renderCaseDetail(){
+  const detail = document.getElementById('caseDetail');
+  const c = state.cases.find(x=>x.id===selectedCaseId);
+  if(!c){
+    detail.innerHTML = '<div class="empty-state">Select a case from the list to view full details and sightings.</div>';
+    return;
+  }
+  const badgeClass = c.status==='ACTIVE'?'badge-active':(c.status==='SAFE'?'badge-safe':'badge-closed');
+  detail.innerHTML = `
+    <div class="detail-header">
+      <div style="display:flex; gap:14px;">
+        <div class="detail-photo">${c.photo?`<img src="${c.photo}">`:''}</div>
+        <div>
+          <div class="cname" style="font-size:22px; font-family:'Barlow Condensed',sans-serif; font-weight:600;">${c.name}</div>
+          <div class="case-id">${c.id}</div>
+          <span class="badge ${badgeClass}" style="margin-top:6px; display:inline-block;">${c.status}</span>
+        </div>
+      </div>
+    </div>
+    <div class="kv-grid">
+      <div class="kv"><div class="k">Age / Gender</div><div class="v">${c.age} · ${c.gender}</div></div>
+      <div class="kv"><div class="k">Reported</div><div class="v">${c.reportedAt}</div></div>
+      <div class="kv"><div class="k">Last Seen Wearing</div><div class="v">${c.clothing}</div></div>
+      <div class="kv"><div class="k">Last Seen Location</div><div class="v">${c.lastseen}</div></div>
+      <div class="kv"><div class="k">Home Address</div><div class="v">${c.address||'—'}</div></div>
+      <div class="kv"><div class="k">Guardian Contact</div><div class="v">${c.contact}</div></div>
+    </div>
+    ${c.notes?`<div class="kv" style="margin-top:12px;"><div class="k">Additional Notes</div><div class="v">${c.notes}</div></div>`:''}
+
+    <div class="section-eyebrow" style="margin-top:22px;">Sightings (${c.sightings.length})</div>
+    <div style="margin-top:10px;">
+      ${c.sightings.length===0
+        ? '<div class="empty-state" style="padding:10px 0;">No sightings reported yet.</div>'
+        : c.sightings.map(s=>`
+          <div class="sighting">
+            <div class="stime">${s.time} · reported by ${s.reporter}</div>
+            <div><b>${s.location}</b></div>
+            ${s.notes?`<div style="color:var(--text-dim); margin-top:3px;">${s.notes}</div>`:''}
+          </div>`).join('')
+      }
+    </div>
+
+    ${c.status==='ACTIVE' ? `
+    <div style="display:flex; gap:10px; margin-top:20px; flex-wrap:wrap;">
+      <button class="btn btn-ghost" style="flex:1;" onclick="broadcastWider('${c.id}')">📡 Broadcast Wider</button>
+      <button class="btn btn-safe" style="flex:1;" onclick="markSafe('${c.id}')">✅ Mark Found / Safe</button>
+    </div>` : `
+    <div style="margin-top:20px; color:var(--safe); font-size:13px; font-weight:600;">✅ Case resolved.</div>
+    `}
+  `;
+}
+
+function broadcastWider(id){
+  const c = state.cases.find(x=>x.id===id);
+  const extra = rand(4,10);
+  c.dist.shops += extra;
+  logActivity(`Wider broadcast for <b>${id}</b> — ${extra} more shops/cameras notified`);
+  showToast(`Broadcast expanded — ${extra} additional points notified.`);
+  renderPolice();
+}
+
+function markSafe(id){
+  const c = state.cases.find(x=>x.id===id);
+  c.status = 'SAFE';
+  logActivity(`Case <b>${id}</b> marked SAFE — child recovered`);
+  showToast(`${c.name} marked as found and safe. 🎉`);
+  renderPolice();
+}
+
+// ================= SHOP / CAMERA VIEW =================
+function renderShop(){
+  const activeCases = state.cases.filter(c=>c.status==='ACTIVE');
+  const list = document.getElementById('shopList');
+  if(activeCases.length===0){
+    list.innerHTML = '<div class="panel empty-state">No active alerts near your location right now.</div>';
+    return;
+  }
+  list.innerHTML = activeCases.map(c=>`
+    <div class="case-card" style="cursor:default;">
+      <div class="case-thumb">${c.photo?`<img src="${c.photo}">`:'👤'}</div>
+      <div class="case-info">
+        <div class="cname">${c.name}, ${c.age}</div>
+        <div class="cmeta">Last seen: ${c.lastseen} — wearing ${c.clothing}</div>
+        <div class="case-id">${c.id} · reported ${c.reportedAt}</div>
+      </div>
+      <button class="btn btn-alert" style="align-self:center; flex-shrink:0;" onclick="openSightModal('${c.id}','${c.name.replace(/'/g,"")}')">I Saw This Child</button>
+    </div>
+  `).join('');
+}
+
+function openSightModal(id, name){
+  sightingModalCaseId = id;
+  document.getElementById('sightModalTitle').textContent = `Sighting: ${name}`;
+  document.getElementById('s_location').value = '';
+  document.getElementById('s_time').value = '';
+  document.getElementById('s_notes').value = '';
+  document.getElementById('sightModal').classList.add('show');
+}
+function closeModal(){
+  document.getElementById('sightModal').classList.remove('show');
+}
+function confirmSighting(){
+  const loc = document.getElementById('s_location').value.trim();
+  if(!loc){ showToast('Please enter where you saw the child.'); return; }
+  const time = document.getElementById('s_time').value.trim() || 'Just now';
+  const notes = document.getElementById('s_notes').value.trim();
+  const c = state.cases.find(x=>x.id===sightingModalCaseId);
+  c.sightings.unshift({ location: loc, time, notes, reporter: 'Shop/Camera Network' });
+  logActivity(`Sighting reported for <b>${c.id}</b> at ${loc}`);
+  closeModal();
+  showToast('Sighting submitted — police notified instantly.');
+  renderShop();
+}
+
+// ================= SEED DEMO DATA =================
+function seedDemo(){
+  const seed = {
+    id:'GL-2026-0005', name:'Priya S.', age:'6', gender:'Female',
+    clothing:'Yellow frock, red hairband', lastseen:'Near Meenakshi Amman Temple East Gate',
+    address:'14, Town Hall Road, Madurai', contact:'90000 11122',
+    notes:'Speaks Tamil only, shy around strangers.', photo:null, status:'ACTIVE',
+    reportedAt:nowStr(), sightings:[
+      {location:'Sri Andal Store, Temple Street', time:'12 mins ago', notes:'Seen walking with an unknown woman towards the bus stand.', reporter:'Shop/Camera Network'}
+    ],
+    dist:{stations:5, shops:14, cameras:21}
+  };
+  state.cases.push(seed);
+  logActivity(`New case opened — <b>${seed.id}</b> (${seed.name}, ${seed.age})`);
+  logActivity(`Alert pushed to ${seed.dist.stations} stations, ${seed.dist.shops} shops, ${seed.dist.cameras} camera points`);
+  logActivity(`Sighting reported for <b>${seed.id}</b> at Sri Andal Store, Temple Street`);
+}
+
+seedDemo();
+renderTicker();
+</script>
+
+</body>
+</html>
